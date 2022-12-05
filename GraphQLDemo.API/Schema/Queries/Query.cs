@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using System.Diagnostics.Contracts;
 
-namespace GraphQLDemo.API.Schema
+namespace GraphQLDemo.API.Schema.Queries
 {
     public class Query
     {

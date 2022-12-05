@@ -1,4 +1,4 @@
-﻿namespace GraphQLDemo.API.Schema
+﻿namespace GraphQLDemo.API.Schema.Queries
 {
     public enum Subject
     {
@@ -14,7 +14,7 @@
         public InstructorType Instructor { get; set; }
         public IEnumerable<StudentType> Students { get; set; }
 
-        public string Description() 
+        public string Description()
         {
             return $"{Name}: This is a course. ";
         }
