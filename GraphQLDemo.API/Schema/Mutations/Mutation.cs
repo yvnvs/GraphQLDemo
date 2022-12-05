@@ -1,4 +1,6 @@
 ﻿using GraphQLDemo.API.Schema.Queries;
+using GraphQLDemo.API.Schema.Subscriptions;
+using HotChocolate.Subscriptions;
 
 namespace GraphQLDemo.API.Schema.Mutations
 {
@@ -9,9 +11,9 @@ namespace GraphQLDemo.API.Schema.Mutations
         {
             _courses = new List<CourseResult>();
         }
-        public CourseResult CreatedCourse(CourseInputType courseInput)
+        public async Task<CourseResult> CreatedCourse(CourseInputType courseInput, [Service] ITopicEventSender topicEventSender)
         {
-            CourseResult courseType = new CourseResult()
+            CourseResult course = new CourseResult()
             {
                 Id = Guid.NewGuid(),
                 Name = courseInput.Name,
@@ -19,11 +21,12 @@ namespace GraphQLDemo.API.Schema.Mutations
                 InstructorId = courseInput.InstructorId
             };
 
-            _courses.Add(courseType);
-            return courseType;
+            _courses.Add(course);
+            await topicEventSender.SendAsync(nameof(Subscription.CourseCreated), course);
+            return course;
         }
 
-        public CourseResult UpdateCourse(Guid id, CourseInputType courseInput)
+        public async Task<CourseResult> UpdateCourse(Guid id, CourseInputType courseInput, [Service] ITopicEventSender topicEventSender)
         {
             var course = _courses.FirstOrDefault(c => c.Id == id);
 
@@ -35,6 +38,8 @@ namespace GraphQLDemo.API.Schema.Mutations
             course.Name = courseInput.Name;
             course.Subject = courseInput.Subject;
             course.InstructorId = courseInput.InstructorId;
+            string updateCourseTopic = $"{course.Id}_{nameof(Subscription.CourseUpdate)}";
+            await topicEventSender.SendAsync(updateCourseTopic, course);
             return course;
         }
 
@@ -43,4 +48,4 @@ namespace GraphQLDemo.API.Schema.Mutations
             return _courses.RemoveAll(c => c.Id == id) >= 1;
         }
     }
-} 
+}
